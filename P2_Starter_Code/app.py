@@ -50,16 +50,15 @@ def index():  # put application's code here
 
 @app.route("/upload", methods=['GET', 'POST'])
 def upload():
-    return render_template('upload.html')
-    # if request.method == 'POST':
-    #     uploaded_file = request.files['file']
-    #     filename = secure_filename(uploaded_file.filename)
-    #     if filename != '':
-    #         file_ext = os.path.splitext(filename)[1]
-    #         if file_ext not in app.config['UPLOAD_EXTENSIONS']:
-    #             abort(400)
-    #         uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
-    # return render_template("upload.html")
+    if request.method == 'POST':
+        uploaded_file = request.files['file']
+        filename = secure_filename(uploaded_file.filename)
+        if filename != '':
+            file_ext = os.path.splitext(filename)[1]
+            if file_ext not in app.config['UPLOAD_EXTENSIONS']:
+                abort(400)
+            uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+    return render_template("upload.html")
 
 
 if __name__ == '__main__':
