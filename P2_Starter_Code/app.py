@@ -1,11 +1,19 @@
-from flask import Flask, render_template
-from flask_bootstrap5 import Bootstrap
+from flask import Flask, render_template, request
+from flask_bootstrap import Bootstrap
 import PyPDF2
+
+from werkzeug.utils import secure_filename
+import os
+from os import abort
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
 
 user = {}
+
+app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024  # max file size is 1MB
+app.config['UPLOAD_EXTENSIONS'] = ['.pdf']  # allows for pdf files
+app.config['UPLOAD_PATH'] = 'uploads'
 
 
 @app.route('/')
@@ -40,5 +48,18 @@ def index():  # put application's code here
     return render_template("index.html", user=user)
 
 
+@app.route("/upload", methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST':
+        uploaded_file = request.files['file']
+        filename = secure_filename(uploaded_file.filename)
+        if filename != '':
+            file_ext = os.path.splitext(filename)[1]
+            if file_ext not in app.config['UPLOAD_EXTENSIONS']:
+                abort(400)
+            uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+    return render_template("upload.html")
+
+
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
