@@ -15,8 +15,6 @@ user = {}
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024  # max file size is 1MB
 app.config['UPLOAD_EXTENSIONS'] = ['.pdf']  # allows for pdf files
 app.config['UPLOAD_PATH'] = 'uploads'
-app.config['DROPZONE_REDIRECT_VIEW'] = 'display'
-
 
 @app.route('/')
 def index():  # put application's code here
@@ -37,40 +35,31 @@ def upload():
 
 @app.route("/display")
 def display():
+    # Open file
     pdfFileObj = open('static/sample_resume.pdf', 'rb')
-    # Creating a pdf reader object
     pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
-    # Getting number of pages in pdf file
-    pages = pdfReader.numPages
+    number_of_pages = pdfReader.numPages
+    parsed_text = ''
+
     # Loop for reading all the Pages
-    for i in range(pages):
-        # Creating a page object
+    for i in range(number_of_pages):
+        # Creating a page object and append text to variable
         pageObj = pdfReader.getPage(i)
-        # Printing Page Number
-        print("Page No: ", i)
-        # Extracting text from page
-        # And splitting it into chunks of lines
-        text = pageObj.extractText().split('\n')
-        # Finally the lines are stored into list
-        # For iterating over list a loop is used
-        user['name'] = text[5]
-        user['email'] = text[18]
+        parsed_text += pageObj.extractText()
 
-        print(user['name'])
-        print(user['email'])
+    parsed_text = CommonRegex(parsed_text)
 
+    # Trying CommonRegex out. These will parse the text of pdf and 
+    # return an array with any values associated with respective parsed_text.attribute 
+    # Documentation - https://github.com/madisonmay/CommonRegex
+    address = parsed_text.street_addresses or ""
+    email = parsed_text.emails or ""
 
-        # for i in range(len(text)):
-        #     # Printing the line
-        #     # Lines are seprated using "\n"
-        #     print(text[i], end="\n")
-        #     # For Seprating the Pages
-        
     # closing the pdf file object
     pdfFileObj.close()
-    
-    return render_template('display.html', first_name="Steve", last_name="Jobs", address="123 Apple St.")
 
+    # Render Template and pass in values for form fields if present
+    return render_template('display.html', first_name="Not_parsed", last_name="Not_parsed", address=address[0], email=email[0])
 
 if __name__ == '__main__':
     app.run(debug=True)
