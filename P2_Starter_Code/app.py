@@ -14,11 +14,12 @@ user = {}
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024  # max file size is 1MB
 app.config['UPLOAD_EXTENSIONS'] = ['.pdf']  # allows for pdf files
 app.config['UPLOAD_PATH'] = 'uploads'
+app.config['DROPZONE_REDIRECT_VIEW'] = 'display'
 
 
 @app.route('/')
 def index():  # put application's code here
-    pdfFileObj = open('static/sample_resume.pdf', 'rb')
+    pdfFileObj = open('uploads/sampleresume.pdf', 'rb')
     # Creating a pdf reader object
     pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
     # Getting number of pages in pdf file
@@ -37,12 +38,12 @@ def index():  # put application's code here
         user['name'] = text[5]
         user['email'] = text[18]
 
-        '''for i in range(len(text)):
+        for i in range(len(text)):
             # Printing the line
             # Lines are seprated using "\n"
             print(text[i], end="\n")
             # For Seprating the Pages
-        '''
+        
     # closing the pdf file object
     pdfFileObj.close()
     return render_template("index.html", user=user)
@@ -58,12 +59,11 @@ def upload():
             if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                 abort(400)
             uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
-            return redirect("/display")
     return render_template("upload.html")
 
 @app.route("/display")
 def display():
-    return render_template("display.html")
+    return render_template()
 
 
 if __name__ == '__main__':
