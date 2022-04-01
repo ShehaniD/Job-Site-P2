@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 from flask_bootstrap import Bootstrap
 import PyPDF2
 
@@ -58,7 +58,12 @@ def upload():
             if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                 abort(400)
             uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+            return redirect("/display")
     return render_template("upload.html")
+
+@app.route("/display")
+def display():
+    return render_template("display.html")
 
 
 if __name__ == '__main__':
