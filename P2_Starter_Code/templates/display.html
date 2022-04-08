@@ -1,3 +1,5 @@
+<script src="{{url_for('static', filename='scripts.js')}}" ></script>
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -30,7 +32,7 @@
       }
     </style>
     <!-- Custom styles for this template -->
-    <link href="form-validation.css" rel="stylesheet">
+    <link href="{{url_for('static', filename='form-validation.css')}}" rel="stylesheet">
   </head>
   <body class="bg-light">
 <div class="container">
@@ -125,6 +127,8 @@
 
     <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
 
-      <script src="form-validation.js"></script>
+      <script type="text/javascript">
+        validateForm();
+      </script>
   </body>
 </html>

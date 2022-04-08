@@ -9,6 +9,7 @@ from os import abort
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
+script_dir = os.path.dirname(__file__)
 
 user = {}
 
@@ -16,9 +17,11 @@ app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024  # max file size is 1MB
 app.config['UPLOAD_EXTENSIONS'] = ['.pdf']  # allows for pdf files
 app.config['UPLOAD_PATH'] = 'uploads'
 
+
 @app.route('/')
 def index():  # put application's code here
     return render_template("index.html")
+
 
 @app.route("/upload", methods=['GET', 'POST'])
 def upload():
@@ -29,37 +32,36 @@ def upload():
             file_ext = os.path.splitext(filename)[1]
             if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                 abort(400)
-            uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
-            return redirect('display')
+            uploaded_file.save(os.path.join(
+                app.config['UPLOAD_PATH'], filename))
+            return redirect('display/' + filename)
     return render_template("upload.html")
 
-@app.route("/display")
-def display():
+
+@app.route("/display/<filename>")
+def display(filename: str):
+    relativePath = 'uploads/' + filename
+    abs_file_path = os.path.join(script_dir, relativePath)
+
+    rawText = ''
     # Open file
-    pdfFileObj = open('static/sample_resume.pdf', 'rb')
-    pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
-    number_of_pages = pdfReader.numPages
-    parsed_text = ''
+    with open(abs_file_path, mode='rb') as f:
+        reader = PyPDF2.PdfFileReader(f)
+        for i in range(reader.numPages):
+            page = reader.getPage(i)
+            rawText += page.extractText()
 
-    # Loop for reading all the Pages
-    for i in range(number_of_pages):
-        # Creating a page object and append text to variable
-        pageObj = pdfReader.getPage(i)
-        parsed_text += pageObj.extractText()
+    parsed_text = CommonRegex(rawText)
 
-    parsed_text = CommonRegex(parsed_text)
-
-    # Trying CommonRegex out. These will parse the text of pdf and 
-    # return an array with any values associated with respective parsed_text.attribute 
+    # Trying CommonRegex out. These will parse the text of pdf and
+    # return an array with any values associated with respective parsed_text.attribute
     # Documentation - https://github.com/madisonmay/CommonRegex
-    address = parsed_text.street_addresses or ""
-    email = parsed_text.emails or ""
-
-    # closing the pdf file object
-    pdfFileObj.close()
+    address = parsed_text.street_addresses[0]
+    email = parsed_text.emails[0]
 
     # Render Template and pass in values for form fields if present
-    return render_template('display.html', first_name="Not_parsed", last_name="Not_parsed", address=address[0], email=email[0])
+    return render_template('display.html', first_name='Hi', last_name='there', address=address, email=email)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
