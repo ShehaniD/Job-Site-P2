@@ -1,7 +1,7 @@
-    var validateForm = function () {
+var validateForm = function () {
     console.log('validating form');
     // Fetch all the forms we want to apply custom Bootstrap validation styles to
-        forms: document.querySelectorAll(".needs-validation");
+    var forms = document.querySelectorAll(".needs-validation");
     // Loop over them and prevent submission
     Array.prototype.slice.call(forms).forEach(function (form) {
         form.addEventListener("submit", function (event) {
