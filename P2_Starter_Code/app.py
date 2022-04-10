@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_bootstrap import Bootstrap
 import PyPDF2
 import re
+import json
 
 from werkzeug.utils import secure_filename
 import os
@@ -63,6 +64,28 @@ def display(filename: str):
 
     # Render Template and pass in values for form fields if present
     return render_template('display.html', email=email, zipcode=zipcode, address=street, state=state)
+
+@app.route("/submit", methods=['POST'])
+def submit():    
+
+    filename = request.form.get('firstName') + "_" + request.form.get('lastName') 
+    data = {
+        'first_name': request.form.get('firstName'),
+        'last_name': request.form.get('lastName'),
+        'email': request.form.get('email'),
+        'address': request.form.get('address'),
+        'addres2': request.form.get('address2'),
+        'country': request.form.get('country'),
+        'state': request.form.get('state'),
+        'zipcode': request.form.get('zip'),
+    }
+
+    json_string = json.dumps(data)
+
+    with open ("./output/" + filename + "_data.json", 'w') as outfile:
+        outfile.write(json_string)
+
+    return render_template('index.html');
 
 
 if __name__ == '__main__':
